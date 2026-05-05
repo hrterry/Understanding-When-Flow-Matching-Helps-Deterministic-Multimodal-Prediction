@@ -197,5 +197,8 @@ Baseline outputs:
 All rights reserved during anonymous review.  
 A final license statement will be released after publication decisions.
 
-This repository is built upon upstream open-source pathology and spatial transcriptomics toolchains,
-including `[mahmoodlab/HEST](https://github.com/mahmoodlab/HEST)`.
+
+This repository is built upon the codebases of
+[`Graph-and-Geometric-Learning/STFlow`](https://github.com/Graph-and-Geometric-Learning/STFlow),
+[`Graph-and-Geometric-Learning/STPath`](https://github.com/Graph-and-Geometric-Learning/STPath),
+and [`mahmoodlab/HEST`](https://github.com/mahmoodlab/HEST).
