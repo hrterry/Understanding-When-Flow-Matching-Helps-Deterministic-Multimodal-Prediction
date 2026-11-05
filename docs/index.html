@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>When Does Flow Matching Help Deterministic Multimodal Prediction?</title>
+<meta name="description" content="NeurIPS 2026. Flow matching helps deterministic histology-to-spatial-transcriptomics prediction when noisy intermediate target states act as aligned, time-aware, selectively integrated target-side supervision.">
+<meta property="og:title" content="When Does Flow Matching Help Deterministic Multimodal Prediction?">
+<meta property="og:description" content="A spatial transcriptomics study. NeurIPS 2026.">
+<meta property="og:image" content="assets/he_st_pairs.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fcfcfb; --surface: #ffffff; --surface-2: #f4f3f0; --ink: #141413; --ink-2: #52514e; --ink-3: #8a8984;
+    --line: #e4e3df; --accent: #eb6834; --accent-ink: #b8461a; --blue: #2a78d6; --good: #1baf7a; --bad: #8a8984;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #161615; --surface: #1e1e1c; --surface-2: #262624; --ink: #f0efec; --ink-2: #c3c2b7; --ink-3: #8f8e88;
+      --line: #383835; --accent: #f07a4a; --accent-ink: #f59a74; --blue: #5b9ae6;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #161615; --surface: #1e1e1c; --surface-2: #262624; --ink: #f0efec; --ink-2: #c3c2b7; --ink-3: #8f8e88;
+    --line: #383835; --accent: #f07a4a; --accent-ink: #f59a74; --blue: #5b9ae6;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.65 Inter, system-ui, -apple-system, sans-serif; }
+  main { max-width: 980px; margin: 0 auto; padding: 0 16px 64px; }
+  header { text-align: center; padding: 56px 0 28px; }
+  .venue { display: inline-block; font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+           color: var(--accent-ink); border: 1px solid var(--accent); border-radius: 999px; padding: 3px 12px; }
+  h1 { font-family: "Source Serif 4", Georgia, serif; font-size: clamp(28px, 4.6vw, 44px); line-height: 1.15; margin: 18px 0 6px; }
+  .subtitle { font-size: clamp(18px, 2.4vw, 22px); color: var(--ink-2); margin: 0 0 18px; }
+  .authors { font-size: 18px; font-weight: 500; }
+  .links { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 22px; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 18px; border-radius: 999px; font-weight: 600; font-size: 15px;
+         text-decoration: none; color: var(--bg); background: var(--ink); }
+  .btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+  .btn[aria-disabled="true"] { opacity: .55; pointer-events: none; }
+  .tldr { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 10px;
+          padding: 18px 22px; margin: 8px 0 28px; font-size: 18px; }
+  .tldr b { color: var(--accent-ink); }
+  h2 { font-family: "Source Serif 4", Georgia, serif; font-size: 28px; margin: 48px 0 8px; }
+  h3 { font-size: 19px; margin: 28px 0 6px; }
+  p { color: var(--ink-2); margin: 8px 0; }
+  figure { margin: 18px 0 10px; }
+  figure img { width: 100%; height: auto; display: block; border-radius: 10px; background: #fff; border: 1px solid var(--line); }
+  figcaption { font-size: 14px; color: var(--ink-3); margin-top: 8px; }
+  .conds { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin: 18px 0; }
+  .cond { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+  .cond .k { font-size: 13px; font-weight: 700; color: var(--accent-ink); letter-spacing: .05em; }
+  .cond .t { font-weight: 600; margin: 2px 0 4px; color: var(--ink); }
+  .cond p { font-size: 15px; margin: 0; }
+  .finding { border-top: 1px solid var(--line); padding-top: 8px; }
+  .tag { display: inline-block; font-size: 12px; font-weight: 700; color: var(--accent-ink); background: var(--surface-2);
+         border-radius: 6px; padding: 2px 8px; margin-right: 6px; vertical-align: 2px; }
+  .table-wrap { overflow-x: auto; margin: 16px 0; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; font-variant-numeric: tabular-nums; }
+  th, td { padding: 9px 12px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  thead th { color: var(--ink-2); font-weight: 600; background: var(--surface-2); }
+  tbody tr:last-child td { border-bottom: 0; }
+  td.best { font-weight: 700; color: var(--accent-ink); }
+  pre { background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; padding: 16px; overflow-x: auto;
+        font: 13.5px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--ink); position: relative; }
+  .copy { position: absolute; top: 8px; right: 8px; font: 600 12px Inter, sans-serif; border: 1px solid var(--line);
+          background: var(--surface); color: var(--ink-2); border-radius: 6px; padding: 4px 10px; cursor: pointer; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } body { font-size: 16px; } }
+  footer { text-align: center; color: var(--ink-3); font-size: 14px; margin-top: 56px; }
+  a { color: var(--blue); }
+  .theme { position: fixed; top: 12px; right: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink-2);
+           border-radius: 999px; padding: 6px 12px; font: 600 13px Inter, sans-serif; cursor: pointer; }
+</style>
+</head>
+<body>
+<button class="theme" id="theme" aria-label="Toggle color theme">Theme</button>
+<main>
+<header>
+  <span class="venue">NeurIPS 2026</span>
+  <h1>When Does Flow Matching Help Deterministic Multimodal Prediction?</h1>
+  <p class="subtitle">A Spatial Transcriptomics Study</p>
+  <div class="authors">Haoran Xu, Wei Yuan, Xiao Han</div>
+  <div class="links">
+    <a class="btn" aria-disabled="true" href="#">Paper (coming soon)</a>
+    <a class="btn ghost" href="https://github.com/hrterry/Understanding-When-Flow-Matching-Helps-Deterministic-Multimodal-Prediction">Code</a>
+    <a class="btn ghost" href="#citation">BibTeX</a>
+  </div>
+</header>
+
+<div class="tldr"><b>TL;DR</b> In deterministic prediction, flow matching is not useful as a sampler. Its noisy intermediate
+states x<sub>t</sub> are useful as <b>target-side supervision</b>, but only when they are condition-aligned,
+time-aware and selectively integrated, and mostly where paired data are scarce.</div>
+
+<figure>
+  <img src="assets/he_st_pairs.jpg" alt="Three held-out test slides: H&E split into patches, a zoom on 224-pixel patches, measured and predicted spatial gene expression.">
+  <figcaption>Histology → spatial transcriptomics on held-out slides. Each H&amp;E slide is split into 224-px patches (one per spot);
+    the model predicts each spot's expression. Measured vs. predicted: CD24 in colon (PCC 0.91), EPCAM in lung (0.85),
+    TRPS1 in a breast-cancer lymph-node metastasis (0.78).</figcaption>
+</figure>
+
+<h2>Abstract</h2>
+<p>Flow matching is increasingly used beyond open-ended generation, including prediction tasks whose outputs are effectively
+deterministic, yet it remains unclear why flow matching helps when diversity is not the objective. We study this question in
+histology-conditioned spatial transcriptomics (ST) prediction, a challenging sparse high-dimensional multimodal task where direct
+regression with pathology foundation features is already competitive. We disentangle several possible explanations and find that
+the gain does not come from simply adding a flow objective, injecting noisy target-side states, or increasing architectural
+complexity. We instead identify intermediate flow states as paired, time-indexed target-side signals: they contain condition-aligned
+information about the target, but are mixed with source noise and residual variation. Their benefit emerges only when this information
+is selectively routed into histology representations. Guided by this mechanism, we instantiate conditional flow matching with simple
+gated self-attention to learn interactions between histology tokens and noisy ST states. Across high-resolution ST datasets, the model
+improves spatial correlation over regression and flow-based baselines, with stable convergence and favorable scaling under larger and
+sparser gene panels.</p>
+
+<h2>Four conditions under which flow matching helps</h2>
+<div class="conds">
+  <div class="cond"><div class="k">C1</div><div class="t">Condition-aligned</div><p>x<sub>t</sub> must come from the same tissue context as the histology.</p></div>
+  <div class="cond"><div class="k">C2</div><div class="t">Time-aware</div><p>How much x<sub>t</sub> can be trusted depends on t; late, nearly clean states invite copying.</p></div>
+  <div class="cond"><div class="k">C3</div><div class="t">Selectively integrated</div><p>Share x<sub>t</sub> as set-level context; never hand each spot its own noisy answer.</p></div>
+  <div class="cond"><div class="k">C4</div><div class="t">Scarce paired data</div><p>The benefit is largest when few paired histology–ST spots are available.</p></div>
+</div>
+
+<h2>Setup</h2>
+<p>Each slide is tiled into patches, one per measured spot. The patches are not i.i.d.: neighbouring spots share
+histology and expression, and each slide has its own expression distribution. The model therefore processes a group of spots
+jointly: histology tokens and noisy ST tokens x<sub>t</sub> = t·x<sub>1</sub> + (1−t)·ε are concatenated and mixed by quadrant-gated
+self-attention, and the clean endpoint is predicted (x-prediction).</p>
+<div class="grid2">
+  <figure><img src="assets/setup_slide_patches.jpg" alt="H&E slide, its spatial transcriptomics spot map, and the slide tiled into patches."><figcaption>An H&amp;E slide, its ST spot map, and its patch tiling.</figcaption></figure>
+  <figure><img src="assets/setup_not_independent.jpg" alt="Correlation between two spots decreases with their distance, for gene expression and histology features."><figcaption>Neighbouring patches are not independent (4 COAD slides, mean ± sd).</figcaption></figure>
+</div>
+
+<h2>Results</h2>
+<p>Gene-wise Pearson correlation (PCC) on held-out slides, all methods using the same UNI pathology features (paper, Table 2).</p>
+<div class="table-wrap"><table>
+  <thead><tr><th>Method</th><th>COAD</th><th>LYMPH</th><th>LUNG</th><th>PAAD</th><th>PRAD</th><th>CCRCC</th></tr></thead>
+  <tbody>
+    <tr><td>Regression</td><td>0.404</td><td>0.295</td><td>0.583</td><td>0.486</td><td>0.302</td><td>0.248</td></tr>
+    <tr><td>STFlow (ICML 2025)</td><td>0.401</td><td>0.261</td><td>0.627</td><td>0.485</td><td>0.298</td><td>0.259</td></tr>
+    <tr><td>Ours (gated self-attention)</td><td class="best">0.459</td><td class="best">0.323</td><td class="best">0.635</td><td class="best">0.492</td><td class="best">0.366</td><td class="best">0.314</td></tr>
+  </tbody>
+</table></div>
+
+<section class="finding">
+<h3><span class="tag">Finding 1</span>The learned flow is effectively deterministic</h3>
+<p>We sample the same model on a held-out slide from 8 different prior noises. For every one of 200 genes, the
+seed-to-seed variation is about 500× smaller than the prediction error and 600× smaller than the spatial signal.
+The benefit of flow matching here cannot come from sampling diversity.</p>
+<figure><img src="assets/determinism_stat.jpg" alt="Per-gene spatial variation, prediction error and sampling variation on a log scale; sampling variation is about three orders of magnitude smaller."><figcaption>Held-out IDC slide, 200 genes, 8 noise seeds; PCC across seeds 0.6855–0.6856.</figcaption></figure>
+</section>
+
+<section class="finding">
+<h3><span class="tag">Finding 2 · C1</span>x<sub>t</sub> is read as slide-level context, and it must be aligned</h3>
+<p>Probing a trained model with x<sub>t</sub> built from the measured test expression: true targets and the same targets shuffled
+across spots give identical accuracy, so the model reads the tissue's expression distribution rather than per-spot answers. Its own
+sampling trajectory recovers that information as well as the true targets do. x<sub>t</sub> taken from <em>another slide</em> lowers
+accuracy below pure noise.</p>
+<div class="grid2">
+  <figure><img src="assets/c1_alignment.jpg" alt="Accuracy with x_t from the same slide, shuffled, pure noise, or another slide; another slide is lowest."><figcaption>Aligned target-side states help; misaligned ones hurt (two IDC models).</figcaption></figure>
+  <figure><img src="assets/real_idc_mechanism.jpg" alt="Matched regression versus single-pass and full-trajectory flow predictions, and probe results across t."><figcaption>Same backbone on IDC: matched regression 0.643 → flow, single pass 0.676 → own 50-step trajectory 0.686.</figcaption></figure>
+</div>
+</section>
+
+<section class="finding">
+<h3><span class="tag">Finding 3 · C2</span>Time decides how much x<sub>t</sub> can be trusted</h3>
+<p>x<sub>t</sub> carries target information only late in the path, mixed with source noise. If a model is allowed to train on late,
+nearly clean per-spot states, it learns to copy them: accuracy falls monotonically while its reliance on x<sub>t</sub> rises.</p>
+<div class="grid2">
+  <figure><img src="assets/theory_info_vs_t.jpg" alt="Theory: share of target variance carried by x_t and posterior weight on x_t as a function of t."><figcaption>Gaussian model (Appendix A).</figcaption></figure>
+  <figure><img src="assets/sim_S3_time_dose.jpg" alt="Accuracy decreases and reliance on x_t increases as the maximum training t increases."><figcaption>Controlled simulation: per-spot x<sub>t</sub> with increasing maximum training t.</figcaption></figure>
+</div>
+</section>
+
+<section class="finding">
+<h3><span class="tag">Finding 4 · C3</span>Shared context helps; per-spot routing creates a shortcut</h3>
+<p>Same backbone, real UNI features, 10 dataset splits, 3 seeds each. Integrating x<sub>t</sub> as set-level context beats an
+architecture-matched regression on 7/10 splits (mean +0.019 PCC); giving each spot its own noisy target loses (mean −0.023).</p>
+<figure><img src="assets/concept_routing.jpg" alt="Diagram: set-level routing shares a pool of x_t tokens; per-spot routing lets each spot copy its own x_t."></figure>
+<figure><img src="assets/routing_real_delta.jpg" alt="Per-split change in PCC versus matched regression for set-level and per-spot variants."><figcaption>Δ PCC vs. matched regression per dataset split.</figcaption></figure>
+</section>
+
+<section class="finding">
+<h3><span class="tag">Finding 5 · C4</span>Most useful when paired data are scarce</h3>
+<p>Below ~20k training spots, set-level target supervision is above matched regression on 7/8 splits and never below it; with
+37k–65k spots it is on par.</p>
+<figure><img src="assets/c4_data_regime.jpg" alt="Change in PCC versus number of training spots on a log scale."><figcaption>Δ PCC vs. matched regression against training-set size.</figcaption></figure>
+</section>
+
+<h2>Takeaways</h2>
+<p>1. In deterministic prediction, flow matching acts as <b>target-side supervision</b>, not as a sampler.<br>
+2. It helps when x<sub>t</sub> is aligned, time-aware and selectively integrated, especially with limited paired data.<br>
+3. Two cheap diagnostics for any generative predictor: an <b>oracle-x<sub>t</sub> probe</b> (can the model read x<sub>t</sub>?) and
+<b>own trajectory vs. single pass</b> (does it use x<sub>t</sub> at inference?).</p>
+
+<h2 id="citation">Citation</h2>
+<pre id="bib"><button class="copy" id="copy">Copy</button>@inproceedings{xu2026flowdeterministic,
+  title     = {When Does Flow Matching Help Deterministic Multimodal Prediction? A Spatial Transcriptomics Study},
+  author    = {Xu, Haoran and Yuan, Wei and Han, Xiao},
+  booktitle = {Advances in Neural Information Processing Systems},
+  year      = {2026}
+}</pre>
+
+<footer>Data: HEST-1k / HEST-Bench · Features: UNI · Page source in <code>docs/</code> of the code repository.</footer>
+</main>
+<script>
+  (function () {
+    var root = document.documentElement, key = "theme";
+    try { var saved = localStorage.getItem(key); if (saved) root.setAttribute("data-theme", saved); } catch (e) {}
+    document.getElementById("theme").addEventListener("click", function () {
+      var dark = root.getAttribute("data-theme") ? root.getAttribute("data-theme") === "dark"
+                 : window.matchMedia("(prefers-color-scheme: dark)").matches;
+      var next = dark ? "light" : "dark";
+      root.setAttribute("data-theme", next);
+      try { localStorage.setItem(key, next); } catch (e) {}
+    });
+    document.getElementById("copy").addEventListener("click", function () {
+      var text = document.getElementById("bib").innerText.replace(/^Copy\s*/, "");
+      var btn = this;
+      if (navigator.clipboard) navigator.clipboard.writeText(text).then(function () { btn.textContent = "Copied"; setTimeout(function () { btn.textContent = "Copy"; }, 1500); });
+    });
+  })();
+</script>
+</body>
+</html>

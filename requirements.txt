@@ -1,0 +1,8 @@
+torch>=2.1
+numpy
+scipy
+pandas
+scikit-learn
+scanpy
+h5py
+pyyaml

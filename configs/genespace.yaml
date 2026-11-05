@@ -1,0 +1,34 @@
+# IDC configuration: flow directly in gene space.
+source_root: data/hest1k_datasets
+embed_root: data/embed_dataroot
+encoder: uni_v1_official
+gene_list: var_200genes.json
+save_dir: results
+
+formulation: flow      # flow | regression (Context-Matched Regression)
+backbone: gated        # gated | vanilla (no quadrant gates) | qwen
+latent: false
+latent_dim: 32
+prediction: x          # x | v (Figure 5)
+xt_mode: noisy         # noisy | clean | permuted | none (Table 1b ablations)
+time: full             # full | none
+
+hidden_dim: 128
+n_layers: 4
+n_heads: 4
+dropout: 0.2
+attn_dropout: 0.2
+img_dropout: 0.5
+
+sampling: shuffled     # shuffled (random spots across slides) | local (nearest spots)
+M: 128
+lr: 0.0005
+clip_norm: 1.0
+epochs: 500
+patience: 100
+eval_every: 1
+ode_steps: 50
+recon_weight: 0.1
+kl_weight: 0.001
+kl_warmup_epochs: 10
+gene_weighting: true
